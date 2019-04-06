@@ -38,13 +38,14 @@ $mail->setFrom('realcenter@rc.com', 'Real Center');
 //Set an alternative reply-to address
 //$mail->addReplyTo('replyto@example.com', 'First Last');
 //Set who the message is to be sent to
-$mail->addAddress($data->to,''); //'rodrigo.moncada@live.com', 'Rodrig Moncada'); 
+$mail->addAddress($data->to,''); 
 //Set the subject line
-$mail->Subject = $data->subject; //'PHPMailer GMail SMTP test'; 
+$mail->IsHTML(true);                                  // set email format to HTML
+$mail->Subject = utf8_decode($data->subject); //'PHPMailer GMail SMTP test'; 
 //Read an HTML message body from an external file, convert referenced images to embedded,
 //convert HTML into a basic plain-text alternative body
 //$mail->msgHTML(file_get_contents('contents.html'), dirname(__FILE__));
-$mail->Body = $data->message; //"Text Message"; //
+$mail->Body = utf8_decode($data->message);
 //Replace the plain text body with one created manually
 //$mail->AltBody = 'This is a plain-text message body';
 //Attach an image file

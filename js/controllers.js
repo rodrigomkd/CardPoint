@@ -1,8 +1,8 @@
-//angular.module('starter.controllers', [])
-var url = "http://nomada.com.mx/cardpoint/js/";
-var url_app = "http://nomada.com.mx/realcenter/";
-var url_users = "http://nomada.com.mx/cardpoint/";
-var limit_points = 8000;
+var url = "http://tarjeta.realcenter.com.mx/intranet/js/";
+var url_app = "http://tarjeta.realcenter.com.mx/intranet/";
+var url_users = "http://tarjeta.realcenter.com.mx/";
+var limit_points = 5000;
+var age_validation = 16;
 
 function JSONToCSVConvertor(JSONData, ReportTitle, Headers) {
 		//If JSONData is not an object then JSON.parse will parse the JSON string in an Object
@@ -132,10 +132,6 @@ realCenterApp.run(function($rootScope, $location, RCService) {
 					return;
 				}
 				
-				if($location.path() == "/report-client-points"){
-					$location.path("/notfound");
-					return;
-				}
 			}
         });
 });
@@ -186,15 +182,14 @@ realCenterApp.controller('ClientViewCtrl', function($scope, $http, $log, $routeP
   }
   
   $scope.errorEmail = false;
-  $scope.emailFormat = /^[a-z]+[a-z0-9._]+@[a-z]+\.[a-z.]{2,5}$/;
+  $scope.emailFormat = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
   
-  // $scope.submitButtonDisabled = false;
-	
    $scope.pushData = function(client) {
 	   var error = false;
 	   
 	   if(typeof client.credential_number === "undefined"){
 		   $scope.credential_number_error = true;
+		   $scope.credential_number_error_msg = "El número de credencial es requerido.";
 		   error = true;
 	   }else{
 		   $scope.credential_number_error = false;
@@ -214,7 +209,7 @@ realCenterApp.controller('ClientViewCtrl', function($scope, $http, $log, $routeP
 		   $scope.last_name_error = false;
 	   }
 	   
-	   var pattern = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	   var pattern = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 	   if(! pattern.test(client.email)){
 		   $scope.email_error = true;
 		   error = true;
@@ -229,7 +224,9 @@ realCenterApp.controller('ClientViewCtrl', function($scope, $http, $log, $routeP
 		   $scope.phone_error = false;
 	   }
 	   
-	   //var pattern_date = /^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$/;
+	   //set register date
+	   $scope.client.register_date = $filter('date')(new Date(), 'yyyy-MM-dd');
+	   
 	   var parms = $scope.birthdate.split(/[\.\-\/]/);
 	   var dd   = parseInt(parms[0],10);
 	   var mm   = parseInt(parms[1],10);
@@ -246,7 +243,13 @@ realCenterApp.controller('ClientViewCtrl', function($scope, $http, $log, $routeP
 		   $scope.birthdate_error = true;
 		   error = true;
 	   }else{
-		   $scope.birthdate_error = false;
+		   //validate if birthday +16
+		   if(validateAge($scope.client.register_date, $scope.birthdate)){
+			   $scope.birthdate_error = false;
+		   }else{
+			   $scope.birthdate_error = true;
+			   error = true;
+		   }
 	   }
 	   
 	   if(typeof client.colony === "undefined"){
@@ -291,50 +294,54 @@ realCenterApp.controller('ClientViewCtrl', function($scope, $http, $log, $routeP
 	   client.last_name = client.last_name.toUpperCase();
 	   client.colony = client.colony.toUpperCase();
 
-	   if($scope.clientid == 0){
-		   var referenceid = Date.now();
-		   $http.post(url + 'pushData.php', { 'credential_number' : client.credential_number, 
-			'name': client.name, 'last_name': client.last_name, 'email': client.email, 
-			'phone': client.phone, 'birthdate': client.birthdate, 'register_date': $scope.client.register_date,
-			'colony': client.colony, 'zip': client.zip, 'gender': client.gender, 'active': '0', 
-			'password': 'NULL', 'userid' : window.localStorage['userid'], 'referenceid' : referenceid })
-            .success(function(data) {
-				RCService.getClientMax().then(function(result2){					
-					RCService.sendEmail("Verificacion de Cuenta","Hola "+client.name+", para validar tu cuenta en Real Center "+
-						"debes ingresar al siguiente enlace y crear una nueva contraseña: " + url_app + "#/register/" 
-						+ referenceid, client.email).then(function(result3){					
-					});
-				});
-				
-				alert("Se guardó el nuevo Cliente correctamente.");
-				$location.path("/list-clients");
-			})
-            .error(function(err) {
-				alert("ERROR: Ocurrió un error al guardar el Cliente.");
-                $log.error(err);
-        })
+	   if($scope.clientid == 0){		   
+		   RCService.getClientByCredential(client.credential_number.trim()).then(function(result_credential){					
+				if(typeof result_credential.credential_number === "undefined"){				 
+				   var referenceid = Date.now();
+					$http.post(url + 'pushData.php', { 'credential_number' : client.credential_number, 
+					'name': client.name, 'last_name': client.last_name, 'email': client.email, 
+					'phone': client.phone, 'birthdate': client.birthdate, 'register_date': $scope.client.register_date,
+					'colony': client.colony, 'zip': client.zip, 'gender': client.gender, 'active': '0', 
+					'password': 'NULL', 'userid' : window.localStorage['userid'], 'referenceid' : referenceid })
+					.success(function(data) {	
+						alert("Se guardó el nuevo Cliente correctamente.");
+						$location.path("/list-clients");
+						
+						RCService.sendEmail("Verificación de Cuenta","Hola "+client.name+", para validar tu cuenta en Real Center "+
+							"debes ingresar al siguiente enlace y crear una nueva contraseña: " + url_users + "#/register/" 
+							+ referenceid, client.email).then(function(result3){ 																
+						});							
+					})
+					.error(function(err) {
+						alert("ERROR: Ocurrió un error al guardar el Cliente.");
+						$log.error(err);
+					})			
+			   }else{
+				   $scope.credential_number_error = true;
+				   $scope.credential_number_error_msg = "No. de Credencial no disponible, favor de ingresar otra Credencial.";
+				   error = true;
+			   }
+			});		   
 	   }else{
 		   	
 			if(typeof $scope.client.userid === "undefined"){
 				$scope.client.userid = 'NULL';
 			}
 			
-			
-			if(current_credential !== client.credential_number){
-				
+			if(current_credential !== client.credential_number){				
 				var c = [];
 				c.clientid = $scope.clientid;
 				c.comments_date = $filter('date')(new Date(), 'yyyy-MM-dd');
 				c.description = "SISTEMA: Se le entregó una nueva credencial. Anterior: " + 
 					current_credential + ". Nueva: " + client.credential_number;
-				RCService.saveComment(c).then(function(result){});
 			}
 			
 			if(current_email !== client.email){
 				$scope.client.active = 0;
-				RCService.sendEmail("Verificacion de Cuenta","Hola "+client.name+", para validar tu cuenta en Real Center "+
-					"debes ingresar al siguiente enlace y crear una nueva contraseña: " + url_app + "#/register/" 
-					+ $scope.client.clientid, client.email).then(function(result3){});
+			}
+			
+			if(typeof $scope.client.referenceid === "undefined"){
+				$scope.client.referenceid = new Date();
 			}
 				
 		   $http.post(url + 'updateClient.php', { 'credential_number' : client.credential_number, 
@@ -345,23 +352,57 @@ realCenterApp.controller('ClientViewCtrl', function($scope, $http, $log, $routeP
             .success(function(data) {
 				alert("Los cambios fueron guardados correctamente.");
 				$location.path("/list-clients");
+				
+				if(current_credential !== client.credential_number){				
+					RCService.saveComment(c).then(function(result){});
+				}
+			
+				if(current_email !== client.email){					
+					RCService.sendEmail("Verificación de Cuenta","Hola "+client.name+", para validar tu nuevo correo electrónico en Real Center "+
+						"debes ingresar al siguiente enlace y crear de nuevo una contraseña: " + url_users + "#/register/" 
+						+ $scope.client.referenceid, client.email).then(function(result3){
+
+						});
+				}
 			})
             .error(function(err) {
-				alert("ERROR: Ocurrió un error al guardar el Cliente.");
+				alert("ERROR: Ocurrió un error al guardar el Cliente." + err);
                 $log.error(err);
 			})
-	   }   			
+	   }//else  			
 	};
 		
 	$scope.resendEmail = function(){
-		if($scope.client.active === 1){
+		if($scope.client.active === '1'){
 			alert("El Cliente ya ha activado su Cuenta.");
 			return;
 		}
+		
+		alert("Se ha enviado el e-mail al correo: " + $scope.client.email);
 		RCService.sendEmail("Verificacion de Cuenta","Hola " + $scope.client.name + ", para validar tu cuenta en Real Center "+
-			"debes ingresar al siguiente enlace y crear una nueva contraseña: " + url_app + "#/register/" 
-			+ $scope.client.clientid, $scope.client.email).then(function(result3){
-				alert("Se ha enviado el e-mail al correo: " + $scope.client.email);
+			"debes ingresar al siguiente enlace y crear una nueva contraseña: " + url_users + "#/register/" 
+			+ $scope.client.referenceid, $scope.client.email).then(function(result3){});		
+	};
+	
+	$scope.validateEmail = function(){
+		if($scope.client.active === '1'){
+			alert("El Cliente ya ha validado su e-mail.");
+			return;
+		}
+		
+		//set active client
+		$scope.client.active = 1;
+		$scope.client.verification_date = $filter('date')(new Date(), 'yyyy-MM-dd');
+		$scope.client.pwd1 = Date.now();
+
+		RCService.updateValidClient($scope.client).then(function(result){
+			let message = "Hola " + $scope.client.name + ", para ingresar al sistema de Puntos 'Real Center' debes " +
+			"abrir el siguiente enlace " + url_users + "#/login. El usuario es tu e-mail proporcionado (" + $scope.client.email + ") y la contraseña es " +
+			"la siguiente: " + $scope.client.pwd1;
+			
+			RCService.sendEmail("Alta de Cuenta", message, $scope.client.email).then(function(result3){ 
+				alert("Se ha validado el e-mail del Cliente correctamente.");
+			});
 		});
 	};
 });
@@ -675,18 +716,6 @@ return {
 });
 
 realCenterApp.controller('PointsRegisterCtrl', function($scope, $http, $log, $routeParams, $filter, $location, RCService) {
-	//insert into commerce_type (`description`,`limited`,`percent`,`points`) values ('Negocios10',null,10,null);
-	//insert into commerce_type (`description`,`limited`,`percent`,`points`) values ('Negocios5',null,5,null);
-	//insert into commerce_type (`description`,`limited`,`percent`,`points`) values ('Restaurantes800',800,100,null);
-	//insert into commerce_type (`description`,`limited`,`percent`,`points`) values ('Restaurantes400',400,100,null);
-	//insert into commerce_type (`description`,`limited`,`percent`,`points`) values ('Negocios100',null,100,null);
-	
-	//INSERT INTO `commerce`(`commercetypeid`, `commerce_name`, `commerce_number`) VALUES (1,'Office Depot', '');
-	//INSERT INTO `commerce`(`commercetypeid`, `commerce_name`, `commerce_number`) VALUES (5,'Burguer King', '');
-	//INSERT INTO `commerce`(`commercetypeid`, `commerce_name`, `commerce_number`) VALUES (4,'Applebees', '');
-	//INSERT INTO `commerce`(`commercetypeid`, `commerce_name`, `commerce_number`) VALUES (2,'Bike City', '');
-	//INSERT INTO `commerce`(`commercetypeid`, `commerce_name`, `commerce_number`) VALUES (6,'AIR MAN', '');
-	
 	$("#datetimepicker1").on("dp.change", function (e) {
 		$scope.buy_date = $("#buy_date").val();
 	});
@@ -795,21 +824,15 @@ realCenterApp.controller('PointsRegisterCtrl', function($scope, $http, $log, $ro
 			comments = point.comments;
 		}
 
-		//check the 8000 points
+		//check the 5000 points
 		RCService.getPointsByClientAndMonth(point.clientid, point.commerceid).then(function(result){
-			if(result.total_points > limit_points){
+			if(result.total_points >= limit_points){
 				alert("No se pueden registrar los Puntos. El Cliente ha llegado al límite de Puntos (" + limit_points + ") por mes y por Negocio.");
 				return;
-			}else if((result.total_points + point.points) > limit_points){
-				point.points = limit_points - (result.total_points + point.points);
-				/*
-				RCService.sendEmail("Puntos Real Center","Hola "+c.name+", Muchas Felicidades por llegar a los " + limit_points + " puntos en tu plaza Real Center, "+
-					"sigue registrando tus puntos para obtener grandes beneficios.").then(function(result3){
-				});
-				*/
-			}else{
+			}else if((Number(result.total_points) + Number(point.points)) > limit_points){
+				point.points = limit_points - result.total_points;
+			}
 				//save Data
-				alert(window.localStorage['userid']);
 			   $http.post(url + 'savePoints.php', { 'clientid' : point.clientid, 
 				'buy_date': point.buy_date, 'register_date': point.register_date, 'commerceid': point.commerceid, 
 				'quantity': point.quantity, 'comments': point.comments, 'ticket_number': point.ticket_number,
@@ -821,8 +844,7 @@ realCenterApp.controller('PointsRegisterCtrl', function($scope, $http, $log, $ro
 				.error(function(err) {
 					alert("ERROR: Ocurrió un error al registrar los Puntos.");
 					$log.error(err);
-				})
-			}
+				})			
 		});
 	};
 	
@@ -898,16 +920,11 @@ realCenterApp.controller('PointsListCtrl', function($scope, $http, $log, $routeP
                 reverse : false
             };
 
-	$http.get(url + 'getPoints.php')
-        .success(function(data) {
-            $scope.items = data;
-			$scope.setPageSize();
-        })
-        .error(function(data,status,headers,config) {
-			//alert(status);
-            $log.error(data);
-	})
-	
+	RCService.getPointsByDates($scope.initial_date, $scope.final_date).then(function(result){
+		$scope.items = result;
+		$scope.setPageSize();
+	});
+
     var searchMatch = function (haystack, needle) {
         if (!needle) {
             return true;
@@ -985,10 +1002,10 @@ realCenterApp.controller('PointsListCtrl', function($scope, $http, $log, $routeP
 			return;
 		}
 
-		$http.post('http://nomada.com.mx/cardpoint/js/deletePoint.php', { 'pointid' : point.pointsid })
+		$http.post(url + 'deletePoint.php', { 'pointid' : point.pointsid })
             .success(function(data) {
 				alert("Se ha cancelado el registro correctamente.");
-				$http.get('http://nomada.com.mx/cardpoint/js/getPoints.php')
+				$http.get(url + 'getPoints.php')
 					.success(function(data) {
 						$scope.items = data;
 						$scope.setPageSize();
@@ -1092,7 +1109,7 @@ realCenterApp.controller('PointsListCommercesCtrl', function($scope, $http, $log
                 reverse : false
             };
 
-	$http.get('http://nomada.com.mx/cardpoint/js/getPointsCommerces.php')
+	$http.get(url + 'getPointsCommerces.php')
         .success(function(data) {
             $scope.items = data;
 			$scope.setPageSize();
@@ -1366,7 +1383,7 @@ realCenterApp.controller('PointsListCommercesDetailsCtrl', function($scope, $htt
                 reverse : false
             };
 
-	$http.post('http://nomada.com.mx/cardpoint/js/getPointsCommercesDetails.php', { 'commerceid' : $routeParams.commerceid })
+	$http.post(url + 'getPointsCommercesDetails.php', { 'commerceid' : $routeParams.commerceid })
         .success(function(data) {
 			$scope.items = data;
 			$scope.setPageSize();
@@ -1375,7 +1392,7 @@ realCenterApp.controller('PointsListCommercesDetailsCtrl', function($scope, $htt
             $log.error(data);
 	})
 	
-	$http.post('http://nomada.com.mx/cardpoint/js/getCommerce.php', { 'commerceid' : $routeParams.commerceid })
+	$http.post(url + 'getCommerce.php', { 'commerceid' : $routeParams.commerceid })
         .success(function(data) {
 			$scope.commerce_name = data.commerce_name;
         })
@@ -1485,7 +1502,7 @@ realCenterApp.controller('PointsListCredentialsDetailsCtrl', function($scope, $h
                 reverse : false
             };
 
-	$http.post('http://nomada.com.mx/cardpoint/js/getPointsCredentialsDetails.php', { 'clientid' : $routeParams.clientid })
+	$http.post(url + 'getPointsCredentialsDetails.php', { 'clientid' : $routeParams.clientid })
         .success(function(data) {
 			$scope.items = data;
 			$scope.setPageSize();
@@ -1494,7 +1511,7 @@ realCenterApp.controller('PointsListCredentialsDetailsCtrl', function($scope, $h
             $log.error(data);
 	})
 	
-	$http.post('http://nomada.com.mx/cardpoint/js/getClient.php', { 'clientid' : $routeParams.clientid })
+	$http.post(url + 'getClient.php', { 'clientid' : $routeParams.clientid })
         .success(function(data) {
 			$scope.credential_number = data.credential_number;
         })
@@ -1616,7 +1633,7 @@ realCenterApp.controller('PointsListCredentialsDetailsCommerceCtrl', function($s
             $log.error(data);
 	})
 	
-	$http.post('http://nomada.com.mx/cardpoint/js/getClient.php', { 'clientid' : clientid })
+	$http.post(url + 'getClient.php', { 'clientid' : clientid })
         .success(function(data) {
 			$scope.credential_number = data.credential_number;
         })
@@ -1624,7 +1641,7 @@ realCenterApp.controller('PointsListCredentialsDetailsCommerceCtrl', function($s
             $log.error(data);
 	})
 	
-	$http.post('http://nomada.com.mx/cardpoint/js/getCommerce.php', { 'commerceid' : commerceid })
+	$http.post(url + 'getCommerce.php', { 'commerceid' : commerceid })
         .success(function(data) {
 			$scope.commerce_name = data.commerce_name;
         })
@@ -1643,7 +1660,6 @@ realCenterApp.controller('PointsListCredentialsDetailsCommerceCtrl', function($s
     $scope.search = function () {
         $scope.filteredItems = $filter('filter')($scope.items, function (item) {
             for(var attr in item) {
-				//alert(attr);
                 if (searchMatch(item[attr], $scope.query))
                     return true;
             }
@@ -2538,8 +2554,8 @@ realCenterApp.controller('UserViewCtrl', function($scope, $http, $log, $routePar
 			})
 			.success(function(data) {
 				RCService.getUserMax().then(function(result2){										
-							RCService.sendEmail("Generacion de Usuario Real Center","Hola "+c.name+", para validar tu usuario en el sistema RCardPoints "+
-								"es necesario que ingreses al siguiente enlace para dar de alta tu contraseña: " + url_users + "#/register-user/" +  
+							RCService.sendEmail("Generación de Usuario Real Center","Hola "+c.name+", para validar tu usuario en el sistema RCardPoints "+
+								"es necesario que ingreses al siguiente enlace para dar de alta tu contraseña: " + url_app + "#/register-user/" +  
 								+ result2.userid, c.user_name).then(function(result3){					
 								alert("Se ha generado el nuevo Usuario correctamente.");
 								$location.path("/list-users");
@@ -2619,7 +2635,7 @@ realCenterApp.controller('LoginCtrl', function($scope, $http, $log, RCService, $
 					&& result.active == 1){
 					window.localStorage['userid'] = result.userid;
 					window.localStorage['role'] = result.role;
-					$rootScope.role = result.role;//window.localStorage['role'];
+					$rootScope.role = result.role;
 					RCService.setRole(result.role);
 					$rootScope.location = "/list-clients";
 					$location.path("/list-clients");			
@@ -2647,7 +2663,7 @@ realCenterApp.controller('RequestPasswordCtrl', function($scope, $http, $log, $r
 					$scope.request_password_error = true;
 					$scope.request_password_error_msg = "No hay una cuenta asociada a este correo electrónico.";
 				}else{
-					RCService.sendEmail("Recuperar Contraseña","Hola "+result.name+", tu contraseña para ingresar al sistema es: " 
+				RCService.sendEmail("Recuperar Contraseña","Hola "+result.name+", tu contraseña para ingresar al sistema <a href='"+url+"'+> es: " 
 						+ result.password, client.email).then(function(result2){					
 						alert("Se ha enviado un correo electrónico con la contraseña.");
 						$location.path("/login");
@@ -3224,6 +3240,33 @@ realCenterApp.controller('ReportClientPointsCtrl', function($scope, $http, $log,
 		var headers = "No.,No. de Credencial,Nombre,e-mail,Celular,Fecha Nacimiento,Fecha Registro,Colonia,Codigo Postal,Sexo,Monto,Puntos";  
 		JSONToCSVConvertor($scope.items, "Reporte_Puntos_Clientes", headers);
 	};
+	
+	$scope.searchByColumn = function(){
+		if(typeof $scope.filterBy === "undefined"){
+			alert("Favor de seleccionar un valor en 'Buscar por'");
+			return;
+		}
+		
+		if(typeof $scope.filterByText === "undefined"){
+			alert("Favor de ingresar el valor a Buscar");
+			return;
+		}
+
+		$scope.filterByText = $scope.filterByText.toUpperCase();
+		RCService.getPointsByColumn("c." + $scope.filterBy, $scope.filterByText).then(function(result){
+			$scope.items = result;
+			$scope.setPageSize();
+		});
+	};
+	
+	$scope.clearSearchByColumn = function(){
+		$scope.filterBy = "undefined";	
+		$scope.filterByText = "";
+		RCService.getClientsByPoints().then(function(result){
+			$scope.items = result;	
+			$scope.setPageSize();
+		});
+	};
 });
 
 realCenterApp.controller('ReportClientRegisterCtrl', function($scope, $http, $log, $routeParams, $filter, $location, RCService) {
@@ -3604,11 +3647,43 @@ realCenterApp.controller('ViewConfigEmailCtrl', function($scope, $http, $log, $r
 	   }
 	   
 	   RCService.updateConfigEmail(c).then(function(result){
-			alert("Los cambios fueron guardados correctamente.");
-			RCService.sendEmail("subject", "message", "rodrigo.mkd@gmail.com").then(function(result){
-				alert("se envio el correo.");
-			//$location.path("/list-client-comments/" + clientid);
-			});
-		}); 			
+			alert("Los cambios fueron guardados correctamente.");			
+		});
 	};
+	
+	$scope.testEmail = function (email){
+		alert("Se ha enviado el correo electrónico. Favor de verificar la Bandeja de Entrada.");
+		RCService.sendEmail("E-mail de prueba","Este es un correo de prueba mediante la aplicacion " +
+			"de CardPoint RealCenter", email).then(function(result3){			
+		});		
+	}
 });
+
+function validateAge(current_date, birthday){
+	var current_array = current_date.split("-");
+	var current_yyyy = current_array[0];
+    var current_mm = current_array[1]; 
+    var current_dd = current_array[2]; 
+    
+    var birth_array = birthday.split("/");
+    var birth_yyyy = birth_array[2];
+    var birth_mm = birth_array[1];
+    var birth_dd = birth_array[0];
+    
+    let diff_yyyy = (current_yyyy - birth_yyyy);
+    if(diff_yyyy > age_validation){
+    	return true;
+    }else if(diff_yyyy == age_validation){
+    	if(current_mm > birth_mm){
+    		return true;
+    	}else if(current_mm == birth_mm){
+        	return (current_dd >= birth_dd);
+        }else{
+        	return false;
+        }
+    }else{
+    	return false;
+    }
+    
+    return true;
+}

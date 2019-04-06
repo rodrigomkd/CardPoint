@@ -33,7 +33,11 @@
 	                            <div class="col-lg-offset-2 col-lg-10">
 	                                <button type="submit" class="btn btn-primary" ng-disabled="clientForm.$pristine">
 	                                    Aceptar
-	                                </button>									
+	                                </button>
+
+									<button type="button" class="btn btn-warning" ng-disabled="clientForm.$pristine" ng-click="testEmail(c.email)">
+	                                    Probar E-mail
+	                                </button>
 	                            </div>
 	                        </div>
 	                    </form>

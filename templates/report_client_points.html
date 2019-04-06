@@ -62,6 +62,26 @@
 					<button class="btn  btn-xs btn-info" ng-click="filterPoints()">Filtrar Puntos</button>
 					<button class="btn  btn-xs btn-warning" ng-click="clearPoints()">Limpiar</button>
 				</div>
+				
+				<br>
+				<br>
+				<div class="form-group">
+                    <div class="form-group pull-right">
+                    <label class="" for="PageSize">Buscar por: </label>
+                    <select class="form-control" name="pageSize" ng-model="filterBy" style="height: 30px;" >
+                        <option value="credential_number">No. Credencial</option>
+                        <option value="name" selected>Nombre(s)</option>
+                        <option value="last_name">Apellidos</option>
+                    </select>
+					&nbsp;
+					<input type="text" name="search" class="form-control" title="Search" 
+                        id="search" ng-model="filterByText" style="height: 30px; width: 200px;" 
+						placeholder="Ingresar valor a buscar..." />
+					&nbsp;
+					<button class="btn  btn-xs btn-info" ng-click="searchByColumn()">Buscar</button>
+					<button class="btn  btn-xs btn-warning" ng-click="clearSearchByColumn()">Limpiar</button>
+					</div>				
+				</div>
 		</div>
 	</div>
 	
@@ -98,7 +118,7 @@
 						<td>{{item.zip}}</td>
 						<td>{{item.gender}}</td>
 						<td>{{item.quantity | currency}}</td>
-						<td>{{item.total_points | number}}</td>
+						<td><b>{{item.total_points | number}}</b></td>
                     </tr>
                 </tbody>
                 <tfoot>

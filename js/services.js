@@ -1,8 +1,6 @@
-//angular.module('starter.services', [])
-
 realCenterApp.factory('RCService', function($http) {
   var service = {};
-  var url = "http://nomada.com.mx/cardpoint/js/";
+  var url = "http://tarjeta.realcenter.com.mx/intranet/js/";
 	var role = "";
 	
 	function getDate(date){
@@ -23,9 +21,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getClient = function(clientid){		
 		return $http.post(url + "getClient.php", {"clientid" : clientid})
-			.then( function(res) { //success callback
+			.then( function(res) {
 			return res.data;
-		},function(err){ //error callback
+		},function(err){
 			console.log(err)
 		})
 	};
@@ -34,7 +32,6 @@ realCenterApp.factory('RCService', function($http) {
 		return $http.post(url + "getClientsDates.php", {"initial_date" : initial_date,
 			"final_date" : final_date })
 			.then( function(res) {
-			alert("que ay: " + res);
 			return res.data;
 		},function(err){
 			console.log(err)
@@ -42,10 +39,10 @@ realCenterApp.factory('RCService', function($http) {
 	};
 	
 	service.getCommerces = function(clientid){
-		return $http.get("http://nomada.com.mx/cardpoint/js/getCommerces.php", {})
-			.then( function(res) { //success callback
+		return $http.get(url + "getCommerces.php", {})
+			.then( function(res) {
 			return res.data;
-		},function(err){ //error callback
+		},function(err){
 			console.log(err)
 		})
 	};
@@ -60,20 +57,20 @@ realCenterApp.factory('RCService', function($http) {
 	};
 	
 	service.getClientByCredential = function(credential_number){
-		return $http.post("http://nomada.com.mx/cardpoint/js/getClientByCredential.php", {"credential_number" : credential_number})
-			.then( function(res) { //success callback
+		return $http.post(url + "getClientByCredential.php", {"credential_number" : credential_number})
+			.then( function(res) {
 			return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
 	};
 	
 	service.getTicketNumber = function(ticket_number, commerceid){
-		return $http.post("http://nomada.com.mx/cardpoint/js/getTicketNumber.php", {"ticket_number" : ticket_number, "commerceid" : commerceid})
-			.then( function(res) { //success callback
+		return $http.post(url + "getTicketNumber.php", {"ticket_number" : ticket_number, "commerceid" : commerceid})
+			.then( function(res) {
 			return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -81,9 +78,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getCategory = function(categoryid){
 		return $http.post(url + "getCategory.php", {"categoryid" : categoryid})
-			.then( function(res) { //success callback
+			.then( function(res) {
 			return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -91,9 +88,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getCategories = function(){
 		return $http.post(url + "getCategories.php", {})
-			.then( function(res) { //success callback
+			.then( function(res) {
 			return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -101,9 +98,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getCommerce = function(commerceid){
 		return $http.post(url + "getCommerce.php", {"commerceid" : commerceid})
-			.then( function(res) { //success callback
+			.then( function(res) {
 			return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -130,9 +127,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getClientMax = function(){
 		return $http.get(url + "getClientMax.php", {})
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -140,9 +137,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getUser = function(userid){
 		return $http.post(url + "getUser.php", {"userid" : userid})
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -150,9 +147,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getUserByEmail = function(email){
 		return $http.post(url + "getUserByEmail.php", {"user_name" : email})
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert(url);
 			alert("ERROR: " + err.status);
 			console.log(err)
@@ -161,9 +158,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getUserMax = function(email){
 		return $http.post(url + "getUserMax.php", {})
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -171,9 +168,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getCardPointsByWeek = function(){
 		return $http.get(url + "getClientsByWeek.php", {})
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -182,9 +179,9 @@ realCenterApp.factory('RCService', function($http) {
 	service.getCardPointsByWeekDates = function(initial_date, final_date){
 		return $http.post(url + "getClientsByWeekDates.php", {'initial_date' : getDate(initial_date), 
 			'final_date' : getDate(final_date) })
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -192,9 +189,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getClientsByPoints = function(){
 		return $http.get(url + "getClientsByPoints.php", {})
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -203,9 +200,9 @@ realCenterApp.factory('RCService', function($http) {
 	service.getClientsByPointsRange = function(initial_points, final_points){
 		return $http.post(url + "getClientsByPointsRange.php", {'initial_points' : initial_points, 
 			'final_points' : final_points})
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -224,9 +221,9 @@ realCenterApp.factory('RCService', function($http) {
 	
 	service.getCommentsByClient = function(clientid){
 		return $http.post(url + "getCommentsByClient.php", {'clientid' : clientid})
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -245,9 +242,9 @@ realCenterApp.factory('RCService', function($http) {
 	service.saveComment = function(c){
 		return $http.post(url + "saveComment.php", {'clientid' : c.clientid, 
 			'comments_date' : c.comments_date, 'description' : c.description })
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -257,9 +254,9 @@ realCenterApp.factory('RCService', function($http) {
 		return $http.post(url + "updateComment.php", {'commentsid' : c.commentsid, 
 			'clientid' : c.clientid, 
 			'description' : c.description })
-			.then( function(res) { //success callback
+			.then( function(res) {
 				return res.data;
-		},function(err){ //error callback
+		},function(err){
 			alert("ERROR: " + err);
 			console.log(err)
 		})
@@ -323,6 +320,15 @@ realCenterApp.factory('RCService', function($http) {
 		})
 	};
 	
+	service.getPointsByColumn = function(column, value){
+		return $http.post(url + "getPointsByColumn.php", { 'column' : column, 'value' : value })
+			.then( function(res) {
+			return res.data;
+		},function(err){
+			console.log(err)
+		})
+	};
+	
 	service.getPointsByDates = function(initial_date, final_date){
 		return $http.post(url + "getPointsByDates.php", {'initial_date' : getDate(initial_date), 
 			'final_date' : getDate(final_date) })
@@ -330,6 +336,17 @@ realCenterApp.factory('RCService', function($http) {
 				return res.data;
 		},function(err){
 			alert("ERROR: " + err);
+			console.log(err)
+		})
+	};
+	
+	service.updateValidClient = function(client){
+		return $http.post(url + "updateValidClient.php", {"verification_date" : 
+			client.verification_date, "active" : 1, "password" : client.pwd1,
+			"clientid" : client.clientid })
+			.then( function(res) {
+				return res.data;
+		},function(err){
 			console.log(err)
 		})
 	};

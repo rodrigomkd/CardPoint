@@ -1,8 +1,8 @@
 <?php
-	define("__HOST__", "207.246.248.101");
-	define("__USER__", "341109_moncada");
-	define("__PASS__", "Rodrigo.1");
-	define("__BASE__", "341109_realcenter");
+	define("__HOST__", "192.254.234.193");
+	define("__USER__", "adrianf_rcenter");
+	define("__PASS__", "irH?APae3K,b");
+	define("__BASE__", "adrianf_RealCenter_Tarjeta");
 	
 	class DB {
 		private $con = false;

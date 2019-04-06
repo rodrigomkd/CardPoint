@@ -1,17 +1,7 @@
-<!--
-<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css" />
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>                       
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
--->
 		<div class="container">
 			<br>
 			<br>
 			<br>
-			<!--<div class="panel panel-default">-->
 				<div class="panel-heading">
 	                <h2 class="panel-title">Formulario - Cliente</h2>
 	            </div>
@@ -22,9 +12,8 @@
 	                                <input ng-model="client.credential_number" 
 									type="text" class="form-control" 
 									id="credential_number" name="credential_number" 
-									placeholder="Ex. MRC00000001" required>
-									<!--<p ng-show="clientForm.credential_number.$invalid && !clientForm.credential_number.$pristine" class="help-block">El número de credencial es requerido.</p>-->
-									<span ng-show="credential_number_error" class="help-block"><font color="red">El número de credencial es requerido.</font></span>                       
+									placeholder="Ex. MRC00000001" required>									
+									<span ng-show="credential_number_error" class="help-block"><font color="red">{{credential_number_error_msg}}</font></span>                       
 								</div>							
 	                        </div>
 							
@@ -58,11 +47,6 @@
 											id="email" name="email" 
 											placeholder="example@email.com" required ng-pattern="emailFormat" />
 									<span ng-show="email_error" class="help-block"><font color="red">Ingresar un e-mail válido.</font></span>
-									<!--
-									<p ng-show="clientForm.email.$invalid && !clientForm.email.$pristine" class="help-block">Enter a valid email.</p>								
-									<span class="error" ng-show="clientForm.email.$error.email">
-									<font color="red">El e-mail ingresado no es válido.</font></span>
-									-->
 	                            </div>
 	                        </div>
 							
@@ -74,13 +58,10 @@
 											id="phone" name="phone" 
 											placeholder="Teléfono" required />
 									<span ng-show="phone_error" class="help-block"><font color="red">El Teléfono es requerido.</font></span>
-											<!--
-											<p ng-show="clientForm.phone.$invalid && !clientForm.phone.$pristine" class="help-block">Enter a valid email.</p>
-											-->
 	                            </div>
 	                        </div>
 							
-							<div class="form-group" ><!--ng-class="{ 'has-error': clientForm.birthdate.$invalid && submitted }">-->
+							<div class="form-group" >
 	                            <label for="inputSubject" class="col-lg-2 control-label">Fecha de Nacimiento</label>
 	                            <div class="col-lg-10">
 									<div class='input-group date' id='datetimepicker1'>	
@@ -91,14 +72,9 @@
 											<span class="input-group-addon">
 											<span class="glyphicon glyphicon-calendar" onclick="setDatePicker()"></span>
 									</div>
-									<span ng-show="birthdate_error" class="help-block"><font color="red">Ingresar una Fecha de Nacimiento válida.</font></span>
-									
-									<!--<p ng-show="clientForm.birthdate.$invalid && !clientForm.birthdate.$pristine" class="help-block">Favor de ingresar una fecha válida.</p>-->
-									
-								</span>
-									
-	                            </div>
-								
+									<span ng-show="birthdate_error" class="help-block"><font color="red">Ingresar una Fecha de Nacimiento válida, el Cliente debe ser mayor de 16 años.</font></span>
+								</span>									
+	                            </div>								
 	                        </div>
 							
 							<div class="form-group" ng-class="{ 'has-error': clientForm.register_date.$invalid && submitted }">
@@ -145,7 +121,6 @@
 									<span ng-show="gender_error" class="help-block"><font color="red">Seleccionar un Sexo.</font></span>
 	                            </div>
 	                        </div>							
-	       <!-- </div> -->
 
 	                        <div class="form-group">
 	                            <div class="col-lg-offset-2 col-lg-10">
@@ -160,23 +135,20 @@
 									
 									<button type="button" class="btn btn-success" data-toggle="tooltip" data-placement="top" 
 									title="Reenviar Correo" tooltip="Reenviar Correo" ng-hide="clientid==0" ng-click="resendEmail()">Reenviar Correo</button>
+									
+									<button type="button" class="btn btn-info" data-toggle="tooltip" data-placement="top" 
+									title="Validar Correo" tooltip="Validar Correo" ng-hide="clientid==0" ng-click="validateEmail()">Validar Correo</button>
 	                            </div>
 	                        </div>
 	                    </form>
 			</div>
 		</div>
 		<script type="text/javascript">
-            $(function () {
-				//$("#datetimepicker1").removeClass('hasDatepicker').datepicker();			
+            $(function () {		
 				$("#datetimepicker1").datetimepicker({
 					format: 'DD/MM/YYYY'
-					//format: 'YYYY-MM-DD'
 				}).on('dp.change', function(ev){
-					// do what you want here
-					//$(this).datepicker('hide');
-					//$scope.birthdate = $("#datetimepicker1").val();
-					//document.getElementById("txtBirthdate").value = document.getElementById("birthdate").value;
-					//alert(document.getElementById("birthdate").value);
+
 				});				
 			});
 			
@@ -184,7 +156,5 @@
 				document.getElementById("name").focus();
 				document.getElementById("birthdate").focus();
 				document.getElementById("birthdate").value = '';
-				//alert(document.getElementById("birthdate").value);
-				//document.getElementById("txtBirthdate").value = document.getElementById("txtBirthdate").value;
 			}
         </script>

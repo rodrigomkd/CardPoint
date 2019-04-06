@@ -36,6 +36,8 @@
                         <option value="10" selected>10</option>
                         <option value="15">15</option>
 						<option value="20">20</option>
+						<option value="100">100</option>
+						<option value="400">400</option>
                     </select>
 					</div>
 				</div>
@@ -69,8 +71,8 @@
 						<th class="colony" custom-sort order="'colony'" sort="sort" style="cursor: pointer;">Colonia&nbsp;</th>
 						<th class="zip" custom-sort order="'zip'" sort="sort" style="cursor: pointer;">Código Postal&nbsp;</th>
 						<th class="gender" custom-sort order="'gender'" sort="sort" style="cursor: pointer;">Sexo&nbsp;</th>
-						<th class="gender" custom-sort order="'gender'" sort="sort" style="cursor: pointer;">Verificacion&nbsp;</th>
-						<th class="gender" custom-sort order="'gender'" sort="sort" style="cursor: pointer;">Usuario&nbsp;</th>
+						<th class="verification_date" custom-sort order="'verification_date'" sort="sort" style="cursor: pointer;">Verificacion&nbsp;</th>
+						<th class="user" custom-sort order="'user'" sort="sort" style="cursor: pointer;">Usuario&nbsp;</th>
 					</tr>
                 </thead>
 				<tbody>
@@ -80,7 +82,7 @@
                         <td>{{item.name}}</td>
 						<td>{{item.last_name}}</td>
                         <td>{{item.email}}</td>
-                        <td>{{item.colony}}</td>
+                        <td>{{item.phone}}</td>
                         <td>{{item.birthdate}}</td>
 						<td>{{item.register_date}}</td>
 						<td>{{item.colony}}</td>
