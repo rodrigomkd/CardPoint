@@ -1,8 +1,8 @@
 <?php
-	define("__HOST__", "192.254.234.193");
-	define("__USER__", "adrianf_rcenter");
-	define("__PASS__", "irH?APae3K,b");
-	define("__BASE__", "adrianf_RealCenter_Tarjeta");
+	define("__HOST__", "localhost");
+	define("__USER__", "rea1908403561174");
+	define("__PASS__", "k0G%Gp7160LWC");
+	define("__BASE__", "rea1908403561174");
 	
 	class DB {
 		private $con = false;
@@ -37,9 +37,8 @@
 				$this->con->query($sql);
 				$this->qryPop();	
 			}
-			//$this->con->close();
+
 			return $this->data;
-			//return $last_id = $conn->insert_id;
 		}
 		
 		public function qryPop() {
@@ -47,8 +46,6 @@
 			$qry = $this->con->query($sql);
 			if($qry->num_rows > 0) {
 				while($row = $qry->fetch_object()) {
-					//echo "$row->credential_number";
-					//echo "$row->last_name";
 					$this->data[] = $row;
 				}
 			} else {
